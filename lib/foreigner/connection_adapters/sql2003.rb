@@ -24,12 +24,14 @@ module Foreigner
         foreign_key_name = foreign_key_name(from_table, column, options)
         primary_key = options[:primary_key] || "id"
         dependency = dependency_sql(options[:dependent])
+        deferred = deferred_sql(options[:deferred])
 
         sql =
           "ADD CONSTRAINT #{quote_column_name(foreign_key_name)} " +
           "FOREIGN KEY (#{quote_column_name(column)}) " +
           "REFERENCES #{quote_table_name(ActiveRecord::Migrator.proper_table_name(to_table))}(#{primary_key})"
         sql << " #{dependency}" if dependency.present?
+        sql << " #{deferred}" if deferred.present?
         sql << " #{options[:options]}" if options[:options]
 
         sql
@@ -66,6 +68,15 @@ module Foreigner
             else ""
           end
         end
+
+        def deferred_sql(deferred)
+          case deferred
+            when :initially_deferred then "DEFERRABLE INITIALLY DEFERRED"
+            when :initially_immediate then "DEFERRABLE INITIALLY IMMEDIATE"
+            else ""
+          end
+        end
+
     end
   end
 end

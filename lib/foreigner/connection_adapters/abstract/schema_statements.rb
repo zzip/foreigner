@@ -51,6 +51,10 @@ module Foreigner
       # [:dependent]
       #   If set to <tt>:delete</tt>, the associated records in from_table are deleted when records in to_table table are deleted.
       #   If set to <tt>:nullify</tt>, the foreign key column is set to +NULL+.
+      # [:deferred]
+      #   If set to <tt>:initially_immediate</tt>, the foreign key can be deferred, but will be initially immediate, unless overriden.
+      #   If set to <tt>:initially_deferred</tt>, the foreign key is by default deferred.
+      #   Currently this option only works for the postgresql adapter.
       # [:options]
       #   Any extra options you want appended to the foreign key definition.
       def add_foreign_key(from_table, to_table, options = {})

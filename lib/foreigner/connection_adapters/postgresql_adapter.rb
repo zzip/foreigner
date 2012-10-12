@@ -5,7 +5,8 @@ module Foreigner
 
       def foreign_keys(table_name)
         fk_info = select_all %{
-          SELECT t2.relname AS to_table, a1.attname AS column, a2.attname AS primary_key, c.conname AS name, c.confdeltype AS dependency
+          SELECT t2.relname AS to_table, a1.attname AS column, a2.attname AS primary_key, c.conname AS name, c.confdeltype AS dependency,
+                 c.condeferrable AS deferrable, c.condeferred AS initially_deferred
           FROM pg_constraint c
           JOIN pg_class t1 ON c.conrelid = t1.oid
           JOIN pg_class t2 ON c.confrelid = t2.oid
@@ -25,6 +26,14 @@ module Foreigner
             when 'c' then :delete
             when 'n' then :nullify
             when 'r' then :restrict
+          end
+
+          if row['deferrable'] == 't'
+            if row ['initially_deferred'] == 't'
+              options[:deferred] = :initially_deferred
+            else
+              options[:deferred] = :initially_immediate
+            end
           end
 
           ForeignKeyDefinition.new(table_name, row['to_table'], options)
