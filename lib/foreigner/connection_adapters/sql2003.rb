@@ -30,6 +30,7 @@ module Foreigner
         foreign_key_name = options.key?(:name) ? options[:name].to_s : foreign_key_name(from_table, column)
         primary_key = options[:primary_key] || "id"
         dependency = dependency_sql(options[:dependent])
+        deferred = deferred_sql(options[:deferred])
 
         proper_name = proper_table_name(to_table)
 
@@ -38,6 +39,7 @@ module Foreigner
           "FOREIGN KEY (#{quote_column_name(column)}) " +
           "REFERENCES #{quote_table_name(proper_name)}(#{primary_key})"
         sql << " #{dependency}" if dependency.present?
+        sql << " #{deferred}" if deferred.present?
         sql << " #{options[:options]}" if options[:options]
 
         sql
@@ -85,6 +87,15 @@ module Foreigner
             else ""
           end
         end
+
+        def deferred_sql(deferred)
+          case deferred
+            when :initially_deferred then "DEFERRABLE INITIALLY DEFERRED"
+            when :initially_immediate then "DEFERRABLE INITIALLY IMMEDIATE"
+            else ""
+          end
+        end
+
     end
   end
 end
